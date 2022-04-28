@@ -29,7 +29,7 @@ pub mod solrand {
     }
 
     pub fn commit_rand(ctx: Context<CommitRand>, commit: [u8; 32]) -> Result<()> {
-        let now_ts = ctx.accounts.clock.unix_timestamp;
+        let now_ts = Clock::get().unwrap().unix_timestamp;
         let new_rand = &mut ctx.accounts.new_rand;
         let pool = &mut ctx.accounts.pool;
         new_rand.commit_time = now_ts;
@@ -46,9 +46,8 @@ pub mod solrand {
     }
 
     pub fn load_rand(ctx: Context<LoadRand>, rand_id: u64) -> Result<()> {
-        let now_ts = ctx.accounts.clock.unix_timestamp;
-        let slot_hashes = ctx.accounts.slot_hashes.as_slice();
-        let pre_slot = slot_hashes[slot_hashes.len() - 4];
+        let clock = Clock::get().unwrap();
+        let now_ts = clock.unix_timestamp;
         let cur_rand = &mut ctx.accounts.cur_rand;
         cur_rand.load_time = now_ts;
         let price1 = load_price(&ctx.accounts.feed_account1.try_borrow_data()?)
@@ -100,9 +99,8 @@ pub mod solrand {
         hasher.update(price6.to_be_bytes());
         hasher.update(price7.to_be_bytes());
         hasher.update(price8.to_be_bytes());
+        hasher.update(clock.slot.to_be_bytes());
         hasher.update(cur_rand.commit_time.to_be_bytes());
-        hasher.update(pre_slot.1);
-        hasher.update(pre_slot.0.to_be_bytes());
         cur_rand.seed.copy_from_slice(&hasher.finalize()[..]);
         cur_rand.status = 1;
         emit!(DidLoad {
@@ -118,7 +116,7 @@ pub mod solrand {
     }
 
     pub fn reveal_rand(ctx: Context<RevealRand>, rand_id: u64, sec: [u8; 32]) -> Result<()> {
-        let now_ts = ctx.accounts.clock.unix_timestamp;
+        let now_ts = Clock::get().unwrap().unix_timestamp;
         let cur_rand = &mut ctx.accounts.cur_rand;
         
         let mut hasher = Sha256::new();
@@ -146,8 +144,8 @@ pub mod solrand {
         Ok(())
     }
 
-    pub fn close_rand(ctx: Context<CloseRand>, rand_id: u64) -> Result<()> {
-        let now_ts = ctx.accounts.clock.unix_timestamp;
+    pub fn close_rand(_ctx: Context<CloseRand>, rand_id: u64) -> Result<()> {
+        let now_ts = Clock::get().unwrap().unix_timestamp;
         emit!(DidClose {
             rand_id: rand_id,
             close_time: now_ts,
@@ -186,8 +184,6 @@ pub struct CreatePool<'info> {
     /// CHECK:AccountsExit
     pub feed_account8: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
@@ -208,8 +204,6 @@ pub struct CommitRand<'info> {
     )]
     pub new_rand: Box<Account<'info, Rand>>,
     pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 
@@ -233,7 +227,7 @@ pub struct LoadRand<'info> {
         mut,
         seeds = [b"rand", pool.key().as_ref(), rand_id.to_be_bytes().as_ref()],
         bump,
-        constraint = cur_rand.commit_time + pool.min_duration <= clock.unix_timestamp,
+        constraint = cur_rand.commit_time + pool.min_duration <= Clock::get().unwrap().unix_timestamp,
         constraint = cur_rand.status == 0,
     )]
     pub cur_rand: Box<Account<'info, Rand>>,
@@ -254,9 +248,6 @@ pub struct LoadRand<'info> {
     /// CHECK:AccountsExit
     pub feed_account8: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
-    pub slot_hashes: Sysvar<'info, SlotHashes>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
@@ -275,8 +266,6 @@ pub struct RevealRand<'info> {
     )]
     pub cur_rand: Account<'info, Rand>,
     pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
@@ -295,8 +284,6 @@ pub struct CloseRand<'info> {
     )]
     pub cur_rand: Account<'info, Rand>,
     pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[account]

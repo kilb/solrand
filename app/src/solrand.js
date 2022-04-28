@@ -29,14 +29,6 @@ const program = new Program(idl, programID, provider);
 const assert = require("assert");
 const fs = require('fs');
 
-function getKeypair() {
-  let data = fs.readFileSync('/home/ke/.config/solana/id.json', 'utf8');
-  let secretKey = Uint8Array.from(JSON.parse(data));
-  return Keypair.fromSecretKey(secretKey);
-}
-
-let myKey = getKeypair();
-
 const priceFeedAccount1 = "J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"; //Crypto.SOL/USD
 const AggregatorPublicKey1 = new PublicKey(priceFeedAccount1);
 const priceFeedAccount2 = "8PugCXTAHLM9kfLSQWe2njE5pzAgUdpPk3Nx5zSm7BD3"; //Crypto.LUNA/USD
@@ -55,7 +47,7 @@ const priceFeedAccount8 = "FVb5h1VmHPfVb1RfqZckchq18GxRv4iKt8T4eVTQAqdz"; //Cryp
 const AggregatorPublicKey8 = new PublicKey(priceFeedAccount8);
 
 
-let pool_id = new anchor.BN(7);
+let pool_id = new anchor.BN(1111);
 
 async function createPool() {
   console.log("program id", program.programId.toBase58());
@@ -82,8 +74,6 @@ async function createPool() {
         feedAccount7: AggregatorPublicKey7,
         feedAccount8: AggregatorPublicKey8,
         systemProgram: anchor.web3.SystemProgram.programId,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
       }
     });
   console.log("Your transaction signature", tx);
@@ -114,8 +104,6 @@ async function commitRand(sec) {
         pool: pool_account_pda,
         newRand: new_rand_pda,
         systemProgram: anchor.web3.SystemProgram.programId,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
       }
     });
   console.log("Your transaction signature", tx);
@@ -153,9 +141,6 @@ async function loadRand(randID) {
         feedAccount7: AggregatorPublicKey7,
         feedAccount8: AggregatorPublicKey8,
         systemProgram: anchor.web3.SystemProgram.programId,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        slotHashes: anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY,
-        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
       }
     });
   console.log("Your transaction signature", tx);
@@ -211,8 +196,6 @@ async function closeRand(randID) {
         pool: pool_account_pda,
         curRand: cur_rand_pda,
         systemProgram: anchor.web3.SystemProgram.programId,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
       }
     });
   console.log("Your transaction signature", tx);
