@@ -260,7 +260,7 @@ pub struct RevealRand<'info> {
     pub pool: Account<'info, Pool>,
     #[account(
         mut,
-        seeds = [b"round", pool.key().as_ref(), rand_id.to_be_bytes().as_ref()],
+        seeds = [b"rand", pool.key().as_ref(), rand_id.to_be_bytes().as_ref()],
         bump,
         constraint = cur_rand.status == 1,
     )]
@@ -278,7 +278,7 @@ pub struct CloseRand<'info> {
     pub pool: Account<'info, Pool>,
     #[account(
         mut,
-        seeds = [b"round", pool.key().as_ref(), rand_id.to_be_bytes().as_ref()],
+        seeds = [b"rand", pool.key().as_ref(), rand_id.to_be_bytes().as_ref()],
         bump,
         close = authority,
     )]

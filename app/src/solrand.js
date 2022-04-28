@@ -168,8 +168,6 @@ async function revealRand(randID, sec) {
         pool: pool_account_pda,
         curRand: cur_rand_pda,
         systemProgram: anchor.web3.SystemProgram.programId,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
       }
     });
   console.log("Your transaction signature", tx);
