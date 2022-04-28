@@ -201,7 +201,7 @@ async function closeRand(randID) {
   return "OK"
 }
 
-const mysec = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 255, 254, 2, 33, 234, 215, 236, 127, 118, 9, 10, 11, 12, 13, 14, 115];
+const mysec = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 255, 254, 2, 33, 234, 215, 236, 127, 118, 9, 10, 11, 12, 13, 14, 115]);
 createPool().then(console.log);
 commitRand(mysec).then(console.log);
 loadRand(0).then(console.log);

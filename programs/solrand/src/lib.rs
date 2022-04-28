@@ -130,9 +130,7 @@ pub mod solrand {
         hasher.update(cur_rand.seed);
         let rand_bytes = &hasher.finalize()[..];
         for i in 0..8 {
-            let mut u32_bytes = [0u8; 4];
-            u32_bytes.copy_from_slice(&rand_bytes[i*8..]);
-            cur_rand.rands[i] = u32::from_be_bytes(u32_bytes);
+            cur_rand.rands[i] = u32::from_be_bytes(rand_bytes[i<<2..(i+1)<<2].try_into().unwrap());
         }
         cur_rand.status = 2;
         emit!(DidReveal {
