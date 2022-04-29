@@ -27,14 +27,14 @@ pub mod solrand {
         pool.authority = ctx.accounts.authority.key();
         pool.min_duration = duration;
         pool.length = 0;
-        pool.feed_account1 = ctx.accounts.feed_account1.key();
-        pool.feed_account2 = ctx.accounts.feed_account2.key();
-        pool.feed_account3 = ctx.accounts.feed_account3.key();
-        pool.feed_account4 = ctx.accounts.feed_account4.key();
-        pool.feed_account5 = ctx.accounts.feed_account5.key();
-        pool.feed_account6 = ctx.accounts.feed_account6.key();
-        pool.feed_account7 = ctx.accounts.feed_account7.key();
-        pool.feed_account8 = ctx.accounts.feed_account8.key();
+        pool.feed_accounts[0] = ctx.accounts.feed_account1.key();
+        pool.feed_accounts[1] = ctx.accounts.feed_account2.key();
+        pool.feed_accounts[2] = ctx.accounts.feed_account3.key();
+        pool.feed_accounts[3] = ctx.accounts.feed_account4.key();
+        pool.feed_accounts[4] = ctx.accounts.feed_account5.key();
+        pool.feed_accounts[5] = ctx.accounts.feed_account6.key();
+        pool.feed_accounts[6] = ctx.accounts.feed_account7.key();
+        pool.feed_accounts[7] = ctx.accounts.feed_account8.key();
         Ok(())
     }
 
@@ -178,14 +178,14 @@ pub struct LoadRand<'info> {
     pub authority: Signer<'info>,
     #[account(
         has_one = authority,
-        constraint = pool.feed_account1 == feed_account1.key(),
-        constraint = pool.feed_account2 == feed_account2.key(),
-        constraint = pool.feed_account3 == feed_account3.key(),
-        constraint = pool.feed_account4 == feed_account4.key(),
-        constraint = pool.feed_account5 == feed_account5.key(),
-        constraint = pool.feed_account6 == feed_account6.key(),
-        constraint = pool.feed_account7 == feed_account7.key(),
-        constraint = pool.feed_account8 == feed_account8.key()
+        constraint = pool.feed_accounts[0] == feed_account1.key(),
+        constraint = pool.feed_accounts[1] == feed_account2.key(),
+        constraint = pool.feed_accounts[2] == feed_account3.key(),
+        constraint = pool.feed_accounts[3] == feed_account4.key(),
+        constraint = pool.feed_accounts[4] == feed_account5.key(),
+        constraint = pool.feed_accounts[5] == feed_account6.key(),
+        constraint = pool.feed_accounts[6] == feed_account7.key(),
+        constraint = pool.feed_accounts[7] == feed_account8.key()
     )]
     pub pool: Account<'info, Pool>,
     #[account(
@@ -260,21 +260,7 @@ pub struct Pool {
     pub min_duration: i64,
     pub length: u64,
     // price feed as random seed
-    pub feed_account1: Pubkey,
-    // price feed as random seed
-    pub feed_account2: Pubkey,
-    // price feed as random seed
-    pub feed_account3: Pubkey,
-    // price feed as random seed
-    pub feed_account4: Pubkey,
-    // price feed as random seed
-    pub feed_account5: Pubkey,
-    // price feed as random seed
-    pub feed_account6: Pubkey,
-    // price feed as random seed
-    pub feed_account7: Pubkey,
-    // price feed as random seed
-    pub feed_account8: Pubkey,
+    pub feed_accounts: [Pubkey; 8],
 }
 
 impl Pool {
