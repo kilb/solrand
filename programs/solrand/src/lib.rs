@@ -1,8 +1,18 @@
 use anchor_lang::prelude::*;
-use pyth_client::load_price;
+use pyth_client::{load_price, Price};
 use sha2::{Sha256, Digest};
 
 declare_id!("RRRRRREjgzmDWKC4M9x5YVVRAXvf9RdGPbwgkfsgpsx");
+
+fn update_hash(hasher: &mut Sha256, price: &Price) {
+    hasher.update(price.prev_slot.to_be_bytes());
+    hasher.update(price.prev_price.to_be_bytes());
+    hasher.update(price.prev_conf.to_be_bytes());
+    hasher.update(price.agg.conf.to_be_bytes());
+    hasher.update(price.agg.price.to_be_bytes());
+    hasher.update(price.agg.pub_slot.to_be_bytes());
+    hasher.update(price.agg.conf.to_be_bytes());
+}
 
 #[program]
 pub mod solrand {
@@ -50,66 +60,23 @@ pub mod solrand {
         let now_ts = clock.unix_timestamp;
         let cur_rand = &mut ctx.accounts.cur_rand;
         cur_rand.load_time = now_ts;
-        let price1 = load_price(&ctx.accounts.feed_account1.try_borrow_data()?)
-            .unwrap()
-            .get_current_price()
-            .unwrap()
-            .price;
-        let price2 = load_price(&ctx.accounts.feed_account2.try_borrow_data()?)
-            .unwrap()
-            .get_current_price()
-            .unwrap()
-            .price;
-        let price3 = load_price(&ctx.accounts.feed_account3.try_borrow_data()?)
-            .unwrap()
-            .get_current_price()
-            .unwrap()
-            .price;
-        let price4 = load_price(&ctx.accounts.feed_account4.try_borrow_data()?)
-            .unwrap()
-            .get_current_price()
-            .unwrap()
-            .price;
-        let price5 = load_price(&ctx.accounts.feed_account5.try_borrow_data()?)
-            .unwrap()
-            .get_current_price()
-            .unwrap()
-            .price;
-        let price6 = load_price(&ctx.accounts.feed_account6.try_borrow_data()?)
-            .unwrap()
-            .get_current_price()
-            .unwrap()
-            .price;
-        let price7 = load_price(&ctx.accounts.feed_account7.try_borrow_data()?)
-            .unwrap()
-            .get_current_price()
-            .unwrap()
-            .price;
-        let price8 = load_price(&ctx.accounts.feed_account8.try_borrow_data()?)
-            .unwrap()
-            .get_current_price()
-            .unwrap()
-            .price;
         let mut hasher = Sha256::new();
-        hasher.update(price1.to_be_bytes());
-        hasher.update(price2.to_be_bytes());
-        hasher.update(price3.to_be_bytes());
-        hasher.update(price4.to_be_bytes());
-        hasher.update(price5.to_be_bytes());
-        hasher.update(price6.to_be_bytes());
-        hasher.update(price7.to_be_bytes());
-        hasher.update(price8.to_be_bytes());
+        update_hash(&mut hasher, load_price(&ctx.accounts.feed_account1.try_borrow_data()?).unwrap());
+        update_hash(&mut hasher, load_price(&ctx.accounts.feed_account2.try_borrow_data()?).unwrap());
+        update_hash(&mut hasher, load_price(&ctx.accounts.feed_account3.try_borrow_data()?).unwrap());
+        update_hash(&mut hasher, load_price(&ctx.accounts.feed_account4.try_borrow_data()?).unwrap());
+        update_hash(&mut hasher, load_price(&ctx.accounts.feed_account5.try_borrow_data()?).unwrap());
+        update_hash(&mut hasher, load_price(&ctx.accounts.feed_account6.try_borrow_data()?).unwrap());
+        update_hash(&mut hasher, load_price(&ctx.accounts.feed_account7.try_borrow_data()?).unwrap());
+        update_hash(&mut hasher, load_price(&ctx.accounts.feed_account8.try_borrow_data()?).unwrap());
         hasher.update(clock.slot.to_be_bytes());
+        hasher.update(now_ts.to_be_bytes());
         hasher.update(cur_rand.commit_time.to_be_bytes());
         cur_rand.seed.copy_from_slice(&hasher.finalize()[..]);
         cur_rand.status = 1;
         emit!(DidLoad {
             rand_id: rand_id,
             load_time: now_ts,
-            seed1: price1,
-            seed2: price2,
-            seed3: price3,
-            seed4: price4,
             seed: cur_rand.seed,
         });
         Ok(())
@@ -342,10 +309,6 @@ pub struct DidCommit {
 pub struct DidLoad {
     rand_id: u64,
     load_time: i64,
-    seed1: i64,
-    seed2: i64,
-    seed3: i64,
-    seed4: i64,
     seed: [u8; 32]
 }
 
